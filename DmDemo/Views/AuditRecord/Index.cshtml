@@ -1,0 +1,65 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Frame.cshtml";
+}
+
+<div class="layui-row">
+    用户名
+    <div class="layui-inline">
+        <input type="text" class="layui-input" id="txtUserName"/>
+    </div>
+    <button class="layui-btn" id="btnSearch">检索</button>
+</div>
+<table id="demo" lay-filter="test"></table>
+
+<script>
+    layui.use('table', function () {
+        var table = layui.table;
+
+        //执行渲染
+        table.render({
+            elem: '#demo' //指定原始表格元素选择器（推荐id选择器）
+            , id: 'dataTable'
+          , height: 'full' //容器高度
+            , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            //,…… //更多参数参考右侧目录：基本参数选项
+           , url: '@Url.Action("List", "AuditRecord")/' //数据接口
+           , page: true //开启分页
+            , cols: [[
+                   { field: 'USERNAME', title: '用户', sort: true }
+                , { field: 'SCHNAME', title: '模式', sort: true }
+                , { field: 'OBJNAME', title: '对象', sort: true }
+                , { field: 'OPERATION', title: '操作', sort: true }
+                , { field: 'SUCC_FLAG', title: '是否成功', sort: true }
+                , { field: 'SQL_TEXT', title: 'SQL', sort: true }
+                , { field: 'OPTIME', title: '操作时间', sort: true }
+
+            ]] //设置表头
+            , parseData: function (res) { //res 即为原始返回的数据
+                var obj = JSON.parse(res);
+                return {
+                    "code": obj.status, //解析接口状态
+                    "msg": obj.message, //解析提示文本
+                    "count": obj.total, //解析数据长度
+                    "data": obj.data //解析数据列表
+                };
+            }
+        });
+
+        var $ = layui.$;
+        $("#tab3").addClass("layui-this");
+
+        $("#btnSearch").on("click", function () {
+            table.reload('dataTable',//ID
+                {
+                    where: { //设定异步数据接口的额外参数，任意设
+                        username: $("#txtUserName").val()
+                    },
+                    page: {
+                        curr:1
+                    }
+                });
+        });
+    });
+</script>

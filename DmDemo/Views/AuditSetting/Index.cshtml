@@ -1,0 +1,140 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Frame.cshtml";
+}
+
+<div class="layui-row">
+    审计级别
+    <div class="layui-inline">
+        <input type="text" class="layui-input" id="txtLevel"/>
+    </div>
+    <button class="layui-btn" id="btnSearch">检索</button>
+    <div class="layui-btn-group">
+        <button class="layui-btn layui-btn-normal" id="btnCreateSTMT">创建语句级</button>
+        <button class="layui-btn layui-btn-normal" id="btnCreateObject">创建对象级</button>
+    </div>
+</div>
+<table id="demo" lay-filter="test"></table>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script>
+    var a = $;
+    layui.use(['table','layer'], function () {
+        var table = layui.table;
+        var layer = layui.layer;
+        //执行渲染
+        table.render({
+            elem: '#demo' //指定原始表格元素选择器（推荐id选择器）
+          , id: 'dataTable'
+          , height: 'full' //容器高度
+            , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+           , url: '@Url.Action("List", "AuditSetting")/' //数据接口
+           , page: true //开启分页
+            , cols: [[
+                  { field: 'SLEVEL', title: '审计级别', sort: true }
+                , { field: 'USERNAME', title: '用户名', sort: true }
+                , { field: 'OBJECTNAME', title: '对象名', sort: true }
+                , { field: 'COLNAME', title: '列名', sort: true }
+                , { field: 'STYPE', title: '审计类型', sort: true }
+                , { field: 'SWHENEVER', title: '审计情况', sort: true }
+                , { fixed: 'right', width: 80, align: 'center', toolbar: '#barDemo' }//绑定列工具条
+            ]] //设置表头
+            , parseData: function (res) { //res 即为原始返回的数据
+                var obj = JSON.parse(res);
+                return {
+                    "code": obj.status, //解析接口状态
+                    "msg": obj.message, //解析提示文本
+                    "count": obj.total, //解析数据长度
+                    "data": obj.data //解析数据列表
+                };
+            }
+        });
+        //监听工具条
+        table.on('tool(test)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+            var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+            if (layEvent === 'del') { //删除
+                layer.confirm('真的删除行吗？', { icon: 3, title: '提示' }, function (index) {
+
+                    //向服务端发送删除指令
+                    var url, postData;
+                    if (data.SLEVEL == "语句级") {
+                        url = "@Url.Action("DeleteStatement", "AuditSetting")";
+                        postData = { type: data.STYPE, username: data.USERNAME, whenever: data.SWHENEVER };
+                    }
+                    else {
+                        url = "@Url.Action("DeleteObject", "AuditSetting")";
+                        postData = {
+                            type: data.STYPE, username: data.USERNAME, whenever: data.SWHENEVER,
+                            tvname: data.OBJECTNAME, colname: data.COLNAME
+                        };
+                    }
+                    $.post(url, postData,
+                        function (res) {
+                            layer.close(index);
+                            var objRes = JSON.parse(res);
+                            if (objRes.status == 0) {
+                                obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                            } else {
+                                layer.alert(objRes.message, { icon: 5 });
+                            }
+                        },"json");
+                });
+            }
+        });
+        var $ = layui.$;
+        $("#tab4").addClass("layui-this");
+
+        $("#btnSearch").on("click", function () {
+            table.reload('dataTable',//ID
+                {
+                    where: { //设定异步数据接口的额外参数，任意设
+                        level: $("#txtLevel").val()
+                    },
+                    page: {
+                        curr: 1
+                    }
+                });
+        });
+
+        $("#btnCreateSTMT").click(function () {
+            layer.open({
+                type: 2,
+                title: '创建语句级审计',
+                content: '@Url.Action("CreateStatement","AuditSetting")',
+                scrollbar: false,
+                area: ['700px', '500px'],
+                resize: false,
+                success: function (layero, index) {
+                    var body = layer.getChildFrame('body', index);
+                    var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+
+                }
+            });
+        });
+
+        $("#btnCreateObject").click(function () {
+            layer.open({
+                type: 2,
+                title: '创建对象级审计',
+                content: '@Url.Action("CreateObject","AuditSetting")',
+                scrollbar: false,
+                area: ['700px', '500px'],
+                resize: false,
+                success: function (layero, index) {
+                    var body = layer.getChildFrame('body', index);
+                    var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+
+                }
+            });
+        });
+    });
+    function refreshList() {
+        $("#btnSearch").click();
+    }
+</script>
+

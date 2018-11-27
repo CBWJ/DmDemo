@@ -1,0 +1,57 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="~/layui/css/layui.css"/>
+    <style>
+        /*.layui-tab-content{
+            position:absolute;
+            top:50px;
+            bottom:10px;
+            left:0;
+            right:0;
+        }*/
+    </style>
+    <title>_Frame</title>
+    <script src="~/layui/layui.js"></script>
+    <script src="~/scripts/jquery-1.11.3.min.js"></script>
+</head>
+<body>
+    <div class="layui-tab layui-tab-card">
+        <ul class="layui-tab-title">
+            <li id="tab1">
+                <a href="~/Home/Index">网站设置</a>   
+            </li>
+            <li id="tab2">
+                <a href="~/Employee/Index">职工列表</a>
+            </li>
+            <li id="tab3">
+                <a href="~/AuditRecord/Index">审计记录查询</a>
+            </li>
+            <li id="tab4">
+                <a href="~/AuditSetting/Index">审计设置</a>
+            </li>
+        </ul>
+        <div class="layui-tab-content" style="height: 100%;">
+            @RenderBody()
+        </div>
+    </div>
+    <script>
+        layui.use('jquery', function () {
+            var $ = layui.$;
+            $(".layui-tab-title li").on("click", function () {
+                var $this = $(this);
+                if ($this.hasClass('layui-this')) return;
+                $(".layui-tab-title .layui-this").removeClass("layui-this");
+                $this.addClass("layui-this");
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+﻿
+@{
+    ViewBag.Title = "CreateObject";
+    Layout = "~/Views/Shared/_LayoutEdit.cshtml";
+    string[] allStatement = (string[])ViewBag.Operation;
+    List<string> users = ViewBag.Users as List<string>;
+}
+
+<input type="hidden" id="action" value="@Url.Action("CreateObject","AuditSetting")"/>
+<div class="layui-form-item">
+    <label class="layui-form-label">语句类型</label>
+    <div class="layui-input-block">
+        <select name="type" lay-verify="required" lay-search>
+            <option value=""></option>
+            @foreach (var s in allStatement)
+            {
+                <option value="@s">@s</option>
+            }
+        </select>
+    </div>
+</div>
+<div class="layui-form-item">
+    <label class="layui-form-label">选择用户</label>
+    <div class="layui-input-block">
+        <select name="username" lay-verify="required" lay-search>
+            <option value=""></option>
+            <option value="NULL">不限制</option>
+            @foreach (var s in users)
+            {
+                <option value="@s">@s</option>
+            }
+        </select>
+    </div>
+</div>
+<div class="layui-form-item">
+    <label class="layui-form-label">对象名</label>
+    <div class="layui-input-block">
+        <input type="text" name="tvname" required lay-verify="required" placeholder="请输入对象名称" autocomplete="off" class="layui-input">
+    </div>
+</div>
+<div class="layui-form-item">
+    <label class="layui-form-label">列名</label>
+    <div class="layui-input-block">
+        <input type="text" name="colname" placeholder="对象是表或视图可选" autocomplete="off" class="layui-input">
+    </div>
+</div>
+<div class="layui-form-item">
+    <label class="layui-form-label">审计时机</label>
+    <div class="layui-input-block">
+        <select name="whenever" lay-verify="required">
+            <option value=""></option>
+            <option value="ALL">所有</option>
+            <option value="SUCCESSFUL">操作成功时</option>
+            <option value="FAIL">操作失败时</option>
+        </select>
+    </div>
+</div>
+
